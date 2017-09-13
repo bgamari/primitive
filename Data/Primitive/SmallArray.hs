@@ -77,6 +77,7 @@ import Data.Data
 import Data.Foldable
 import Data.Functor.Identity
 import Data.Monoid
+import Data.Semigroup
 import Text.ParserCombinators.ReadPrec
 import Text.Read
 import Text.Read.Lex
@@ -574,6 +575,12 @@ instance MonadZip SmallArray where
 
 instance MonadFix SmallArray where
   mfix f = fromList . mfix $ toList . f
+
+#if MIN_VERSION_base(4,10,0)
+instance Semigroup (SmallArray a) where
+  (<>) = (<|>)
+  sconcat = mconcat . toList
+#endif
 
 instance Monoid (SmallArray a) where
   mempty = empty

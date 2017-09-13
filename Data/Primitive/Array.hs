@@ -34,6 +34,7 @@ import qualified GHC.Exts as Exts
 import GHC.Exts (fromListN, fromList)
 #endif
 
+import qualified Data.Foldable as F
 import Data.Typeable ( Typeable )
 import Data.Data
   (Data(..), DataType, mkDataType, Constr, mkConstr, Fixity(..), constrIndex)
@@ -44,6 +45,9 @@ import Control.Monad.ST(ST,runST)
 import Control.Applicative
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fix
+#if MIN_VERSION_base(4,10,0)
+import Data.Semigroup
+#endif
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip
 #endif
@@ -527,6 +531,12 @@ instance MonadZip Array where
 
 instance MonadFix Array where
   mfix f = let l = mfix (toList . f) in fromListN (length l) l
+
+#if MIN_VERSION_base(4,10,0)
+instance Semigroup (Array a) where
+  (<>) = (<|>)
+  sconcat = mconcat . F.toList
+#endif
 
 instance Monoid (Array a) where
   mempty = empty
